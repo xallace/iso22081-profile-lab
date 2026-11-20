@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>General Profile &amp; ISO 22081 Lab · ISO 22081 vs. ISO 2768-2</title>
+  <meta name="description" content="Interactive 1967 book-plate lab for DIN EN ISO 22081: General Surface Profile (⌓), unilateral/unequal UZ offset zones, datum-locked vs. floating profile, ISO 2768-2 withdrawal audit, and ISO 22081 title-block builder." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2218%22 fill=%22%23efe6d3%22 stroke=%22%23181715%22 stroke-width=%226%22/><path d=%22M20 66 A30 30 0 0 1 80 66 Z%22 fill=%22%23faf5e8%22 stroke=%22%23d94426%22 stroke-width=%227%22 stroke-linejoin=%22round%22/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Top Header (Pure 1967 Technical Book-Plate Aesthetic) -->
+    <header id="app-header">
+      <div class="header-left">
+        <a href="https://xallace.github.io/#technical-design" class="pill-btn back-chip" title="Back to Portfolio Hub">← Portfolio</a>
+        <div class="brand-badge-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 16 A8 8 0 0 1 20 16 Z" stroke="#d94426" stroke-width="2.1" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>GENERAL PROFILE LAB <span class="sub-tag">ISO 22081</span></h1>
+          <p class="source-ref">ISO 22081 vs. ISO 2768-2 (Withdrawn) · Surface Profile ⌓ · UZ Offset &amp; Datum Lock</p>
+        </div>
+      </div>
+
+      <nav class="main-tabs" role="tablist" aria-label="Laboratory Modules">
+        <button class="tab-btn active" data-tab="profile" role="tab" aria-selected="true" id="tab-profile">1 · Profile ⌓ &amp; UZ</button>
+        <button class="tab-btn" data-tab="compare" role="tab" aria-selected="false" id="tab-compare">2 · 22081 vs. 2768-2</button>
+        <button class="tab-btn" data-tab="titleblock" role="tab" aria-selected="false" id="tab-titleblock">3 · Title-Block Builder</button>
+        <button class="tab-btn" data-tab="rules" role="tab" aria-selected="false" id="tab-rules">4 · ISO 22081 Rules</button>
+      </nav>
+
+      <div class="header-right">
+        <button id="btn-tour" class="pill-btn accent"><span>▶</span> Guided Tour</button>
+      </div>
+    </header>
+
+    <!-- Guided Tour Banner -->
+    <section id="tour-banner" class="tour-banner hidden" aria-live="polite">
+      <div class="tour-left">
+        <span class="tour-step-badge" id="tour-step-badge">Stop 1 / 4</span>
+        <div>
+          <h2 class="tour-title" id="tour-title">Tour Stop</h2>
+          <p class="tour-body" id="tour-body"></p>
+        </div>
+      </div>
+      <div class="tour-controls">
+        <button id="btn-tour-prev" class="pill-btn">← Prev</button>
+        <button id="btn-tour-next" class="pill-btn vermilion">Next →</button>
+        <button id="btn-tour-close" class="pill-btn" title="Close guided tour">✕</button>
+      </div>
+    </section>
+
+    <main class="workspace">
+
+      <!-- ================================================================
+           TAB 1: GENERAL SURFACE PROFILE ⌓, UZ OFFSET & DATUM LOCK
+           ================================================================ -->
+      <section class="view active" id="view-profile">
+        <div class="split-layout">
+          <div class="stage-col">
+            <div class="verdict-strip">
+              <div class="verdict-cell" id="p-v-active">
+                <span class="v-kicker">ACTIVE SPEC VERDICT</span>
+                <div class="v-value" id="p-active-val">PASS</div>
+                <span class="v-sub" id="p-active-sub">All points inside ⌓ 0.40 | A | B | C</span>
+              </div>
+              <div class="verdict-cell" id="p-v-band">
+                <span class="v-kicker">SIGNED TOLERANCE BAND</span>
+                <div class="v-value" id="p-band-val">−0.20 .. +0.20</div>
+                <span class="v-sub" id="p-band-sub">Bilateral Equal (Symmetric)</span>
+              </div>
+              <div class="verdict-cell" id="p-v-mode">
+                <span class="v-kicker">DATUM LOCK VS. FLOATING</span>
+                <div class="v-value" id="p-mode-val">FORM+ORI+LOC</div>
+                <span class="v-sub" id="p-mode-sub">Form span 0.100 mm · Peak 0.145 mm</span>
+              </div>
+            </div>
+
+            <div class="plate-card">
+              <div class="plate-card-head">
+                <span class="plate-fig-label">PLATE I · GENERAL SURFACE PROFILE ⌓ ZONE AROUND CAD TED CONTOUR (EXAGGERATED 14×)</span>
+                <div class="plate-head-controls">
+                  <button id="btn-uz-in" class="mini-btn" title="Unilateral inside material">UZ −t/2</button>
+                  <button id="btn-uz-zero" class="mini-btn vermilion active" title="Bilateral symmetric">UZ 0</button>
+                  <button id="btn-uz-out" class="mini-btn" title="Unilateral outside material">UZ +t/2</button>
+                </div>
+              </div>
+              <canvas id="canvas-profile" class="canvas-main"></canvas>
+            </div>
+
+            <div class="plate-card compact">
+              <div class="plate-card-head">
+                <span class="plate-fig-label">FIG. 1B · UNWRAPPED NORMAL DEVIATION δ(s) ALONG PART PERIMETER</span>
+                <span class="plate-fig-note">Red peaks outside dashed UZ bounds = out-of-tolerance breach</span>
+              </div>
+              <canvas id="canvas-deviation" class="canvas-strip"></canvas>
+            </div>
+          </div>
+
+          <aside class="inspector-col">
+            <div class="panel-card">
+              <div class="envelope-master active-m" id="p-master-box">
+                <div class="env-top-row">
+                  <div>
+                    <span class="env-kicker">ISO 22081 GENERAL PROFILE CALLOUT</span>
+                    <div class="env-callout" id="p-fcf-display">| ⌓ | 0.40 | A | B | C |</div>
+                  </div>
+                  <button id="btn-toggle-datum" class="e-toggle-btn" aria-pressed="true">
+                    <span class="e-circle">⌓</span>
+                    <span id="ui-btn-datum-label">Datum-Locked</span>
+                  </button>
+                </div>
+                <p class="env-explain" id="p-explain"></p>
+              </div>
+
+              <div class="control-section">
+                <div class="section-label">CLASSIC SHOP-FLOOR SCENARIOS</div>
+                <div class="preset-grid" id="p-presets">
+                  <button class="preset-btn active" data-ppre="bilateral-pass">Bilateral Pass</button>
+                  <button class="preset-btn" data-ppre="uz-stock">Unilateral Stock (UZ+)</button>
+                  <button class="preset-btn" data-ppre="datum-shift">Datum Shift Caught</button>
+                  <button class="preset-btn" data-ppre="step-trap">Step-Face Trap</button>
+                  <button class="preset-btn" data-ppre="mold-in">Clearance Mold (UZ−)</button>
+                </div>
+              </div>
+
+              <div class="control-section">
+                <div class="section-label">PROFILE ZONE &amp; PART DEVIATIONS (mm)</div>
+
+                <div class="slider-item">
+                  <div class="slider-head">
+                    <label for="sl-t">Profile Tolerance Width t</label>
+                    <strong id="val-t">0.40 mm</strong>
+                  </div>
+                  <input id="sl-t" type="range" min="0.10" max="1.00" step="0.02" value="0.40" />
+                </div>
+
+                <div class="slider-item">
+                  <div class="slider-head">
+                    <label for="sl-uz">Unequal / Unilateral Offset UZ</label>
+                    <strong id="val-uz">0.00 mm</strong>
+                  </div>
+                  <input id="sl-uz" type="range" min="-0.50" max="0.50" step="0.02" value="0.00" />
+                </div>
+
+                <div class="slider-row-dual">
+                  <div class="slider-item">
+                    <div class="slider-head"><label for="sl-sx">Shift Δx (from B)</label><strong id="val-sx">+0.04 mm</strong></div>
+                    <input id="sl-sx" type="range" min="-0.35" max="0.35" step="0.01" value="0.04" />
+                  </div>
+                  <div class="slider-item">
+                    <div class="slider-head"><label for="sl-sy">Shift Δy (from A)</label><strong id="val-sy">+0.04 mm</strong></div>
+                    <input id="sl-sy" type="range" min="-0.35" max="0.35" step="0.01" value="0.04" />
+                  </div>
+                </div>
+
+                <div class="slider-row-dual">
+                  <div class="slider-item">
+                    <div class="slider-head"><label for="sl-tilt">Angular Tilt</label><strong id="val-tilt">+0.05°</strong></div>
+                    <input id="sl-tilt" type="range" min="-0.45" max="0.45" step="0.01" value="0.05" />
+                  </div>
+                  <div class="slider-item">
+                    <div class="slider-head"><label for="sl-wave">Form Waviness</label><strong id="val-wave">0.05 mm</strong></div>
+                    <input id="sl-wave" type="range" min="0.00" max="0.25" step="0.01" value="0.05" />
+                  </div>
+                </div>
+
+                <div class="slider-item">
+                  <div class="slider-head">
+                    <label for="sl-step">Upper Step &amp; Shoulder Local Error</label>
+                    <strong id="val-step">+0.04 mm</strong>
+                  </div>
+                  <input id="sl-step" type="range" min="-0.40" max="0.40" step="0.01" value="0.04" />
+                </div>
+              </div>
+
+              <div class="control-section">
+                <div class="section-label">EXACT ISO 22081 / ISO 1101 TELEMETRY</div>
+                <table class="spec-table" id="p-telemetry"></table>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           TAB 2: ISO 22081 VS. ISO 2768-2 (WITHDRAWN) AMBIGUITY AUDIT
+           ================================================================ -->
+      <section class="view" id="view-compare">
+        <div class="split-layout">
+          <div class="stage-col">
+            <div class="verdict-strip">
+              <div class="verdict-cell fail" id="c-v-legacy">
+                <span class="v-kicker">ISO 2768-2 (WITHDRAWN 2021)</span>
+                <div class="v-value" id="c-legacy-val">3 BLINDSPOTS</div>
+                <span class="v-sub" id="c-legacy-sub">Ambiguous step, no freeform ⌓, weak datums</span>
+              </div>
+              <div class="verdict-cell pass" id="c-v-modern">
+                <span class="v-kicker">DIN EN ISO 22081:2021</span>
+                <div class="v-value" id="c-modern-val">0 AMBIGUITIES</div>
+                <span class="v-sub" id="c-modern-sub">100% deterministic CAD TED + Datum System</span>
+              </div>
+              <div class="verdict-cell info" id="c-v-pass">
+                <span class="v-kicker">INSPECTION COVERAGE</span>
+                <div class="v-value" id="c-pass-val">3 / 5 PASS</div>
+                <span class="v-sub" id="c-pass-sub">Faults caught cleanly under ISO 22081</span>
+              </div>
+            </div>
+
+            <div class="plate-card">
+              <div class="plate-card-head">
+                <span class="plate-fig-label">PLATE II · LIVE FEATURE-BY-FEATURE DRAWING AUDIT (TOGGLE LEGACY VS. MODERN)</span>
+                <div class="plate-head-controls">
+                  <button id="btn-mode-2768" class="mini-btn">View ISO 2768-2 (Legacy)</button>
+                  <button id="btn-mode-22081" class="mini-btn vermilion active">View ISO 22081 (Active)</button>
+                </div>
+              </div>
+              <canvas id="canvas-compare" class="canvas-cross"></canvas>
+            </div>
+          </div>
+
+          <aside class="inspector-col">
+            <div class="panel-card">
+              <h2 class="plate-heading">Why ISO 2768-2 Was Withdrawn</h2>
+              <p class="plate-prose">
+                Legacy <code>ISO 2768-2</code> (withdrawn in 2021) left freeform surfaces uncontrolled, relied on the ambiguous <em>“longer feature = datum”</em> rule, and could not separate step distances from features of size. <strong>ISO 22081</strong> replaces it with one crisp <strong>General Surface Profile <code>⌓ t | A | B | C</code></strong> plus an explicit <strong>General Size</strong> rule.
+              </p>
+
+              <div class="control-section">
+                <div class="section-label">STANDARDS &amp; INJECTED PART ERRORS</div>
+                <div class="preset-grid" style="margin-bottom:10px;" id="c-class-btns">
+                  <button class="preset-btn" data-cls="H">2768-H (Fine)</button>
+                  <button class="preset-btn active" data-cls="K">2768-K (Med)</button>
+                  <button class="preset-btn" data-cls="L">2768-L (Coarse)</button>
+                </div>
+
+                <div class="slider-row-dual">
+                  <div class="slider-item">
+                    <div class="slider-head"><label for="sl-ct">ISO 22081 Profile ⌓</label><strong id="val-ct">0.40 mm</strong></div>
+                    <input id="sl-ct" type="range" min="0.10" max="1.00" step="0.05" value="0.40" />
+                  </div>
+                  <div class="slider-item">
+                    <div class="slider-head"><label for="sl-cs">General Size ±</label><strong id="val-cs">±0.20 mm</strong></div>
+                    <input id="sl-cs" type="range" min="0.05" max="0.50" step="0.05" value="0.20" />
+                  </div>
+                </div>
+
+                <div class="slider-row-dual">
+                  <div class="slider-item">
+                    <div class="slider-head"><label for="sl-cstep">Step Shift Error</label><strong id="val-cstep">0.26 mm</strong></div>
+                    <input id="sl-cstep" type="range" min="0.00" max="0.50" step="0.02" value="0.26" />
+                  </div>
+                  <div class="slider-item">
+                    <div class="slider-head"><label for="sl-cfree">Freeform Bulge</label><strong id="val-cfree">0.34 mm</strong></div>
+                    <input id="sl-cfree" type="range" min="0.00" max="0.50" step="0.02" value="0.34" />
+                  </div>
+                </div>
+
+                <div class="slider-row-dual">
+                  <div class="slider-item">
+                    <div class="slider-head"><label for="sl-cwall">Side Wall Tilt</label><strong id="val-cwall">0.24 mm</strong></div>
+                    <input id="sl-cwall" type="range" min="0.00" max="0.60" step="0.02" value="0.24" />
+                  </div>
+                  <div class="slider-item">
+                    <div class="slider-head"><label for="sl-cbore">Ø20 Bore Size Err</label><strong id="val-cbore">0.14 mm</strong></div>
+                    <input id="sl-cbore" type="range" min="0.00" max="0.40" step="0.02" value="0.14" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="control-section">
+                <div class="section-label">5-FEATURE COMPLIANCE AUDIT</div>
+                <div class="audit-list" id="c-audit-list"></div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           TAB 3: ISO 22081 TITLE-BLOCK BUILDER & COVERAGE SIMULATOR
+           ================================================================ -->
+      <section class="view" id="view-titleblock">
+        <div class="split-layout">
+          <div class="stage-col">
+            <div class="verdict-strip">
+              <div class="verdict-cell pass" id="tb-v-status">
+                <span class="v-kicker">TITLE-BLOCK AUDIT</span>
+                <div class="v-value" id="tb-status-val">ISO 22081 VALID</div>
+                <span class="v-sub" id="tb-status-sub">Ready for release &amp; CMM programming</span>
+              </div>
+              <div class="verdict-cell info">
+                <span class="v-kicker">ACTIVE GENERAL CALLOUT</span>
+                <div class="v-value" id="tb-fcf-val" style="font-size:1.05rem;">| ⌓ | 0.40 | A | B | C |</div>
+                <span class="v-sub" id="tb-fcf-sub">Applies to all untoleranced surfaces</span>
+              </div>
+              <div class="verdict-cell" id="tb-v-issues">
+                <span class="v-kicker">SPECIFICATION CHECKS</span>
+                <div class="v-value" id="tb-issues-val">0 WARNINGS</div>
+                <span class="v-sub" id="tb-issues-sub">ISO 8015 + ISO 22081 aligned</span>
+              </div>
+            </div>
+
+            <div class="plate-card">
+              <div class="plate-card-head">
+                <span class="plate-fig-label">PLATE III · ISO 22081 DRAWING TITLE BLOCK &amp; FEATURE COVERAGE MAP</span>
+                <span class="plate-fig-note">Live technical drawing block preview</span>
+              </div>
+              <canvas id="canvas-titleblock" class="canvas-cross"></canvas>
+            </div>
+          </div>
+
+          <aside class="inspector-col">
+            <div class="panel-card">
+              <h2 class="plate-heading">Build a Clean ISO 22081 Title Block</h2>
+              <p class="plate-prose">
+                Unlike ISO 2768, <strong>ISO 22081 contains no fixed H/K/L lookup tables</strong>. The designer chooses the exact general profile <code>⌓</code> value, explicit datum system, and general size tolerance appropriate to the part's function and manufacturing process.
+              </p>
+
+              <div class="control-section">
+                <div class="section-label">GENERAL TOLERANCE VALUES</div>
+                <div class="slider-row-dual">
+                  <div class="slider-item">
+                    <div class="slider-head"><label for="sl-tbt">General Profile ⌓</label><strong id="val-tbt">0.40 mm</strong></div>
+                    <input id="sl-tbt" type="range" min="0.10" max="1.20" step="0.05" value="0.40" />
+                  </div>
+                  <div class="slider-item">
+                    <div class="slider-head"><label for="sl-tbs">General Linear Size ±</label><strong id="val-tbs">±0.20 mm</strong></div>
+                    <input id="sl-tbs" type="range" min="0.05" max="0.50" step="0.05" value="0.20" />
+                  </div>
+                </div>
+
+                <div class="slider-item" id="tb-uz-wrap">
+                  <div class="slider-head"><label for="sl-tbuz">Optional UZ Offset (when enabled)</label><strong id="val-tbuz">+0.10 mm</strong></div>
+                  <input id="sl-tbuz" type="range" min="-0.30" max="0.30" step="0.05" value="0.10" />
+                </div>
+              </div>
+
+              <div class="control-section">
+                <div class="section-label">DECLARATION CHECKLIST (TEST VIOLATIONS!)</div>
+                <div class="check-stack">
+                  <label class="inline-check">
+                    <input type="checkbox" id="chk-tb-datums" checked />
+                    <span>Reference explicit 3-2-1 Datum System <strong><code>| A | B | C |</code></strong></span>
+                  </label>
+                  <label class="inline-check">
+                    <input type="checkbox" id="chk-tb-cad" checked />
+                    <span>Declare linked <strong>3D CAD model / TEDs</strong> for untoleranced surfaces</span>
+                  </label>
+                  <label class="inline-check">
+                    <input type="checkbox" id="chk-tb-size" checked />
+                    <span>Include <strong>General Linear Size</strong> specification (for untoleranced bores/shafts)</span>
+                  </label>
+                  <label class="inline-check">
+                    <input type="checkbox" id="chk-tb-uz" />
+                    <span>Apply unequal <strong><code>UZ</code></strong> stock offset to general profile</span>
+                  </label>
+                  <label class="inline-check">
+                    <input type="checkbox" id="chk-tb-2768" />
+                    <span><em>Anti-pattern:</em> Also leave legacy <strong><code>ISO 2768-mK</code></strong> in title block</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="control-section">
+                <div class="section-label">COMPLIANCE DIAGNOSTICS</div>
+                <div class="issue-stack" id="tb-issue-stack"></div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           TAB 4: ISO 22081 RULES & MIGRATION CHEAT SHEET
+           ================================================================ -->
+      <section class="view" id="view-rules">
+        <div class="standards-sheet-page">
+          <div class="sheet-folio-header">
+            <span>PLATE IV · DIN EN ISO 22081:2021 MIGRATION &amp; SPECIFICATION RULES</span>
+            <span>GENERAL SURFACE PROFILE ⌓ · UZ OFFSET · REPLACING ISO 2768-2</span>
+          </div>
+
+          <h2 class="plate-heading large">Migrating Cleanly from ISO 2768-2 to ISO 22081</h2>
+          <p class="sheet-subtitle">ISO 2768-2 was officially withdrawn in 2021. Here is the exact GPS specification discipline required on modern engineering drawings.</p>
+
+          <div class="rules-spread">
+            <div class="rule-col">
+              <div class="rule-badge good">DO THIS IN ISO 22081</div>
+              <ul class="plate-list">
+                <li><strong>One 3D Skin for All Untoleranced Surfaces:</strong> State <code>ISO 22081</code> with a single <code>⌓ t | A | B | C</code> callout so every plane, step, fillet, chamfer, and freeform surface inherits exact CAD TED limits.</li>
+                <li><strong>Separate Size from Geometry:</strong> Add a General Linear Size tolerance (e.g., <code>±0.2 mm</code>) specifically for untoleranced <em>features of size</em> (holes, slots, shafts, parallel plates).</li>
+                <li><strong>Use Individual Specs for Critical Features:</strong> Tighter functional fits (<code>Ø25 H7</code>, <code>⊥ 0.02 | A</code>) automatically override the general specification without needing exclusions.</li>
+              </ul>
+            </div>
+            <div class="rule-col is-warn">
+              <div class="rule-badge warn">LEGACY 2768-2 TRAPS TO AVOID</div>
+              <ul class="plate-list">
+                <li><strong>Never Mix <code>ISO 2768-2</code> &amp; <code>ISO 22081</code>:</strong> Leaving both in an old CAD title-block template creates conflicting legal interpretations in supplier audits.</li>
+                <li><strong>Never Omit Datums on General <code>⌓</code>:</strong> Writing <code>⌓ 0.4</code> without <code>| A | B | C</code> only controls surface <em>form</em> — step heights and wall angles can drift arbitrarily!</li>
+                <li><strong>Don't Misread <code>UZ</code>:</strong> Under ISO 1101 / ISO 22081, <code>⌓ 0.4 UZ +0.2</code> means total width is <code>0.4 mm</code> shifted <code>+0.2 mm</code> outward (band <code>0.00 .. +0.40 mm</code>), NOT <code>±0.4 mm</code>!</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="sheet-divider"></div>
+
+          <h3 class="plate-subhead">Direct Comparison: ISO 2768-2 (Withdrawn) vs. DIN EN ISO 22081:2021</h3>
+          <table class="ref-matrix">
+            <thead>
+              <tr>
+                <th>Criterion</th>
+                <th>ISO 2768-2:1989 (Withdrawn)</th>
+                <th>DIN EN ISO 22081:2021 (Active)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Tolerance Mechanism</strong></td>
+                <td>Fixed lookup tables (classes <code>H / K / L</code>) by nominal length</td>
+                <td>Designer-selected General Surface Profile <code>⌓ t | A | B | C</code> + General Size</td>
+              </tr>
+              <tr>
+                <td><strong>Freeform &amp; 3D CAD Surfaces</strong></td>
+                <td><strong>Uncontrolled blindspot</strong> (no surface profile rule)</td>
+                <td><strong>100% enclosed</strong> in a uniform 3D profile skin around nominal CAD TEDs</td>
+              </tr>
+              <tr>
+                <td><strong>Datum Definition</strong></td>
+                <td>Ambiguous “longer feature is datum” heuristic</td>
+                <td>Explicit, unambiguous <strong>Datum System <code>| A | B | C |</code></strong> (ISO 5459)</td>
+              </tr>
+              <tr>
+                <td><strong>Step Heights / Non-Size</strong></td>
+                <td>Confusingly mixed into ISO 2768-1 <code>±</code> linear tolerances</td>
+                <td>Controlled cleanly by <code>⌓ t | A | B | C</code> (form + orientation + location together)</td>
+              </tr>
+              <tr>
+                <td><strong>Unequal / Unilateral Offset</strong></td>
+                <td>Not supported</td>
+                <td>Supported natively via <strong><code>UZ ±u</code></strong> (zone <code>[−t/2 + u, +t/2 + u]</code>)</td>
+              </tr>
+              <tr>
+                <td><strong>ISO 8015 Independency</strong></td>
+                <td>Predates modern ISO GPS matrix rules</td>
+                <td>Fully harmonized with ISO 8015, ISO 1101, ISO 5459, and ISO 14405-1</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="sources-footer-box">
+            <strong>Standards &amp; Technical References:</strong>
+            DIN EN ISO 22081:2021 (Geometrical product specifications — General geometrical specifications and general size specifications) ·
+            ISO 2768-2:1989 (Withdrawn 2021) · DIN EN ISO 1101:2017 (Profile of a surface <code>⌓</code> &amp; <code>UZ</code> modifier) ·
+            DIN EN ISO 1660 · DIN EN ISO 5459 · DIN EN ISO 8015 ·
+            Schütte &amp; Jorden, <em>Form- und Lagetoleranzen</em> (Ch. 09 Allgemeintoleranzen) ·
+            Hoischen, <em>Technisches Zeichnen</em> (34th ed., Ch. 06).
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="site-footer">
+      <span class="footer-note">Verified analytically against DIN EN ISO 22081 &amp; ISO 1101 surface profile / UZ equations (14 automated checks · zero external dependencies)</span>
+      <span class="footer-meta">General Profile Lab · <a href="https://xallace.github.io" target="_blank" rel="noopener noreferrer">xallace.github.io</a></span>
+    </footer>
+  </div>
+
+  <script src="profile-math.js"></script>
+  <script src="draw.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
