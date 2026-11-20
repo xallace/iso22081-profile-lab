@@ -1,5 +1,5 @@
 /* ==========================================================================
-   draw.js — High-DPI Technical Drafting Renderers for Plate 08 (ISO 22081)
+   draw.js — High-DPI Technical Drafting Renderers for TD-01 (ISO 22081)
    1967 Technical Book-Plate Palette (#faf5e8, #181715, #d94426, #047857, #0369a1)
    ========================================================================== */
 
@@ -101,6 +101,17 @@
     ctx.restore();
   }
 
+  // Shrinks the font until `text` fits into maxW (min 7px)
+  function fitFont(ctx, text, maxW, size, weight, family) {
+    let s = size;
+    ctx.font = `${weight} ${s}px ${family}`;
+    while (s > 7 && ctx.measureText(text).width > maxW) {
+      s -= 0.5;
+      ctx.font = `${weight} ${s}px ${family}`;
+    }
+    return s;
+  }
+
   function drawTedBox(ctx, x, y, text) {
     ctx.save();
     ctx.font = '600 10.5px "JetBrains Mono", monospace';
@@ -135,8 +146,9 @@
     const toY = (mmY) => oy - mmY * scale;
 
     const samples = sol.samples;
-    const upperOff = sol.datumLocked ? sol.upperBound : sol.formMid + sol.t * 0.5;
-    const lowerOff = sol.datumLocked ? sol.lowerBound : sol.formMid - sol.t * 0.5;
+    // Zone is always [UZ − t/2, UZ + t/2]; in floating mode the part is shown after the rigid best fit
+    const upperOff = sol.upperBound;
+    const lowerOff = sol.lowerBound;
 
     // 1. Filled nominal CAD part body
     ctx.beginPath();
@@ -207,22 +219,20 @@
 
       const x0 = sol.datumLocked
         ? toX(p0.x + p0.dispX * exag)
-        : toX(p0.x + p0.nx * p0.formDev * exag);
+        : toX(p0.x + p0.nx * p0.devFloat * exag);
       const y0 = sol.datumLocked
         ? toY(p0.y + p0.dispY * exag)
-        : toY(p0.y + p0.ny * p0.formDev * exag);
+        : toY(p0.y + p0.ny * p0.devFloat * exag);
       const x1 = sol.datumLocked
         ? toX(p1.x + p1.dispX * exag)
-        : toX(p1.x + p1.nx * p1.formDev * exag);
+        : toX(p1.x + p1.nx * p1.devFloat * exag);
       const y1 = sol.datumLocked
         ? toY(p1.y + p1.dispY * exag)
-        : toY(p1.y + p1.ny * p1.formDev * exag);
+        : toY(p1.y + p1.ny * p1.devFloat * exag);
 
       const bad = sol.datumLocked
         ? p0.outLocked || p1.outLocked
-        : !sol.passFloating &&
-          (Math.abs(p0.formDev - sol.formMid) > sol.t * 0.5 + 1e-9 ||
-            Math.abs(p1.formDev - sol.formMid) > sol.t * 0.5 + 1e-9);
+        : p0.outFloat || p1.outFloat;
 
       ctx.beginPath();
       ctx.moveTo(x0, y0);
@@ -238,26 +248,32 @@
       drawDatumTriangle(ctx, toX(0), toY(16), 'left', 'B');
     } else {
       ctx.fillStyle = C.blue;
-      ctx.font = '600 10.5px "JetBrains Mono", monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('FLOATING PROFILE (NO DATUMS) — ZONE BEST-FITS TO PART FORM', w * 0.5, toY(0) + 34);
+      fitFont(ctx, 'NO DATUMS — ZONE MOVED AS A RIGID BODY TO BEST FIT THE PART', w - 24, 10.5, '600', '"JetBrains Mono", monospace');
+      ctx.fillText('NO DATUMS — ZONE MOVED AS A RIGID BODY TO BEST FIT THE PART', w * 0.5, toY(0) + 40);
     }
 
-    // TED annotations on drawing
+    // TED annotations on drawing (48 and 32 from A, 80 from B along the base)
     drawTedBox(ctx, toX(41), toY(48) - 22, '48.00');
     drawTedBox(ctx, toX(14), toY(32) - 18, '32.00');
-    drawTedBox(ctx, toX(80) + 28, toY(17), '80.00');
+    drawTedBox(ctx, toX(64), toY(0) + 18, '80.00');
 
-    // Legend strip in top-left
+    // Legend strip in top-left (wraps to a new line instead of clipping on narrow canvases)
     ctx.font = '600 10px "JetBrains Mono", monospace';
     ctx.textAlign = 'left';
-    const lx = 14, ly = 18;
-    ctx.fillStyle = C.ink;
-    ctx.fillText('— Actual contour', lx, ly);
-    ctx.fillStyle = sol.datumLocked ? C.ok : C.blue;
-    ctx.fillText('--- ⌓ Tolerance zone', lx + 122, ly);
-    ctx.fillStyle = C.vermilion;
-    ctx.fillText('— Out-of-zone breach', lx + 265, ly);
+    const legend = [
+      ['— Actual contour', C.ink],
+      ['--- ⌓ Tolerance zone', sol.datumLocked ? C.ok : C.blue],
+      ['— Out-of-zone breach', C.vermilion]
+    ];
+    let lx = 14, ly = 18;
+    legend.forEach(([txt, col]) => {
+      const tw = ctx.measureText(txt).width;
+      if (lx > 14 && lx + tw > w - 14) { lx = 14; ly += 14; }
+      ctx.fillStyle = col;
+      ctx.fillText(txt, lx, ly);
+      lx += tw + 22;
+    });
   }
 
   /* ==========================================================================
@@ -270,13 +286,17 @@
     const padL = 56, padR = 18, padT = 18, padB = 26;
     const plotW = w - padL - padR;
     const plotH = h - padT - padB;
-    const maxY = Math.max(0.55, Math.abs(sol.upperBound) + 0.12, Math.abs(sol.lowerBound) + 0.12, sol.absPeakLocked + 0.08);
+    const devOf = (p) => (sol.datumLocked ? p.devLocked : p.devFloat);
+    const peak = sol.datumLocked
+      ? sol.absPeakLocked
+      : Math.max(Math.abs(sol.maxFloat), Math.abs(sol.minFloat));
+    const maxY = Math.max(0.55, Math.abs(sol.upperBound) + 0.12, Math.abs(sol.lowerBound) + 0.12, peak + 0.08);
     const mapX = (s) => padL + (s / sol.totalPerimeter) * plotW;
     const mapY = (v) => padT + plotH * 0.5 - (v / maxY) * (plotH * 0.46);
 
-    // Tolerance band shading
-    const uVal = sol.datumLocked ? sol.upperBound : sol.formMid + sol.t * 0.5;
-    const lVal = sol.datumLocked ? sol.lowerBound : sol.formMid - sol.t * 0.5;
+    // Tolerance band shading (same band in both modes; floating values are after the best fit)
+    const uVal = sol.upperBound;
+    const lVal = sol.lowerBound;
     const yTop = mapY(uVal);
     const yBot = mapY(lVal);
 
@@ -308,18 +328,22 @@
     ctx.font = '600 9.5px "JetBrains Mono", monospace';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
-    ctx.fillText(`${uVal >= 0 ? '+' : ''}${uVal.toFixed(2)}`, padL - 6, yTop);
+    const signed = (v) => {
+      const r = Number(v.toFixed(2));
+      return r === 0 ? '0.00' : `${r > 0 ? '+' : '−'}${Math.abs(r).toFixed(2)}`;
+    };
+    if (Math.abs(yTop - y0) > 10) ctx.fillText(signed(uVal), padL - 6, yTop);
     ctx.fillText('0.00', padL - 6, y0);
-    ctx.fillText(`${lVal >= 0 ? '+' : ''}${lVal.toFixed(2)}`, padL - 6, yBot);
+    if (Math.abs(yBot - y0) > 10) ctx.fillText(signed(lVal), padL - 6, yBot);
 
     // Deviation waveform
     const samples = sol.samples;
     for (let i = 1; i < samples.length; i++) {
       const a = samples[i - 1];
       const b = samples[i];
-      const va = sol.datumLocked ? a.devLocked : a.formDev;
-      const vb = sol.datumLocked ? b.devLocked : b.formDev;
-      const bad = va > uVal + 1e-9 || va < lVal - 1e-9 || vb > uVal + 1e-9 || vb < lVal - 1e-9;
+      const va = devOf(a);
+      const vb = devOf(b);
+      const bad = sol.datumLocked ? a.outLocked || b.outLocked : a.outFloat || b.outFloat;
 
       ctx.beginPath();
       ctx.moveTo(mapX(a.s), mapY(va));
@@ -329,19 +353,39 @@
       ctx.stroke();
     }
 
-    // Perimeter landmark labels
+    // Perimeter landmarks derived from the segment arc lengths
+    const spans = sol.segments.map((seg) => {
+      const pts = samples.filter((p) => p.segId === seg.id);
+      const s0 = pts[0].s;
+      const next = samples[samples.indexOf(pts[pts.length - 1]) + 1];
+      const s1 = next ? next.s : sol.totalPerimeter;
+      return { name: seg.name, s0, s1 };
+    });
+
+    // Segment boundary ticks
+    ctx.strokeStyle = 'rgba(24, 23, 21, 0.22)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    spans.forEach((sp, i) => {
+      if (i === 0) return;
+      const x = Math.round(mapX(sp.s0)) + 0.5;
+      ctx.moveTo(x, padT);
+      ctx.lineTo(x, padT + plotH);
+    });
+    ctx.stroke();
+
+    // Labels centred on each segment; skipped where they would overlap a neighbour
     ctx.fillStyle = C.dim;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    const marks = [
-      { frac: 0.15, txt: 'Datum A Base' },
-      { frac: 0.36, txt: 'Right Wall' },
-      { frac: 0.52, txt: 'Freeform' },
-      { frac: 0.67, txt: 'Upper Step' },
-      { frac: 0.88, txt: 'Datum B' }
-    ];
-    marks.forEach((m) => {
-      ctx.fillText(m.txt, padL + m.frac * plotW, h - 16);
+    let lastRight = -Infinity;
+    spans.forEach((sp) => {
+      const cxs = mapX((sp.s0 + sp.s1) * 0.5);
+      const segW = mapX(sp.s1) - mapX(sp.s0);
+      const tw = ctx.measureText(sp.name).width;
+      if (tw > segW - 4 || cxs - tw / 2 < lastRight + 6) return;
+      ctx.fillText(sp.name, cxs, h - 16);
+      lastRight = cxs + tw / 2;
     });
   }
 
@@ -369,12 +413,19 @@
     ctx.fillRect(14, 12, w - 28, 30);
     ctx.strokeRect(14, 12, w - 28, 30);
     ctx.fillStyle = isLegacy ? C.vermilion : C.ok;
-    ctx.font = '700 11.5px "JetBrains Mono", monospace';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    const bannerTxt = isLegacy
-      ? `LEGACY VIEW: ${audit.iso2768Label.toUpperCase()} (WITHDRAWN 2021) — ${audit.legacyBlindspots} AMBIGUITIES / BLINDSPOTS`
-      : `ACTIVE VIEW: DIN EN ISO 22081:2021 — | ⌓ | ${audit.tProfile.toFixed(2)} | A | B | C | + GENERAL SIZE ±${audit.tSize.toFixed(2)}`;
+    const n = audit.features.length;
+    const bannerVariants = isLegacy
+      ? [`LEGACY VIEW: ${audit.iso2768Label} (PART 2 WITHDRAWN 2021) — ${audit.legacyGaps} OF ${n} FEATURES WITHOUT A CLEAR REQUIREMENT`,
+         `LEGACY: ${audit.iso2768Label} — ${audit.legacyGaps} OF ${n} WITHOUT CLEAR REQUIREMENT`,
+         `${audit.iso2768Label}: ${audit.legacyGaps} OF ${n} UNDEFINED`]
+      : [`ISO 22081 VIEW — | ⌓ | ${audit.tProfile.toFixed(2)} | A | B | C | + GENERAL SIZE ±${audit.tSize.toFixed(2)}`,
+         `ISO 22081: | ⌓ | ${audit.tProfile.toFixed(2)} | A | B | C | ±${audit.tSize.toFixed(2)}`];
+    const bannerFont = '"JetBrains Mono", monospace';
+    ctx.font = `700 9px ${bannerFont}`;
+    const bannerTxt = bannerVariants.find((t) => ctx.measureText(t).width <= w - 48) || bannerVariants[bannerVariants.length - 1];
+    fitFont(ctx, bannerTxt, w - 48, 11.5, '700', bannerFont);
     ctx.fillText(bannerTxt, 24, 27);
     ctx.restore();
 
@@ -406,7 +457,7 @@
     ctx.stroke();
 
     // Mounting Bore Ø20 (Feature of Size) at (18, 16)
-    const boreX = toX(18), boreY = toY(16), boreR = 8.2 * scale;
+    const boreX = toX(18), boreY = toY(16), boreR = 10 * scale; // Ø20
     const boreFeat = audit.features[3];
     const boreBad = isLegacy ? boreFeat.legacyStatus === 'FAIL' : !boreFeat.modernPass;
     ctx.beginPath();
@@ -495,15 +546,16 @@
     const stSeat = isLegacy ? fSeat.legacyStatus : fSeat.modernStatus;
     badge(seatX, seatY + seatR + 18, '⊥ 0.02|A', stSeat, colorFor(stSeat));
 
-    // Datums (explicit under ISO 22081, questioned under ISO 2768-2)
+    // Datums (datum system under ISO 22081; ISO 2768-2 uses the longer leg of an angle)
     if (!isLegacy) {
       drawDatumTriangle(ctx, toX(40), toY(0), 'bottom', 'A');
       drawDatumTriangle(ctx, toX(0), toY(16), 'left', 'B');
     } else {
+      const note = 'ISO 2768-2: NO DATUM SYSTEM — FOR ⊥ THE LONGER LEG SERVES AS DATUM';
       ctx.fillStyle = C.amber;
-      ctx.font = '700 10.5px "JetBrains Mono", monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('? NO EXPLICIT DATUMS ("LONGER FEATURE = DATUM" HEURISTIC)', w * 0.5, toY(0) + 34);
+      fitFont(ctx, note, w - 28, 10.5, '700', '"JetBrains Mono", monospace');
+      ctx.fillText(note, w * 0.5, toY(0) + 34);
     }
   }
 
@@ -530,7 +582,7 @@
     const blocks = [
       {
         label: '1. Untoleranced Planes, Steps & Freeform',
-        cov: cfg.hasDatums ? `Covered by ${res.fcfLine}` : '⚠ FORM ONLY (Location unlocked!)',
+        cov: cfg.hasDatums ? `Covered by ${res.fcfLine}` : '⚠ Floating zone (rigid best fit), not tied to A|B|C',
         ok: cfg.hasDatums && cfg.hasCadTed
       },
       {
@@ -540,12 +592,12 @@
       },
       {
         label: '3. Precision Individual Callouts (e.g. Ø25 H7, ⊥ 0.02 | A)',
-        cov: 'Individual specification automatically supersedes ISO 22081',
+        cov: 'Indicated on the feature; interplay with the general spec: ISO 22081 §5.2',
         ok: true
       },
       {
         label: '4. Legacy Standard Conflict Check',
-        cov: cfg.cites2768 ? '✗ CONFLICT: ISO 2768-2 must be removed!' : 'Clean: Only ISO 8015 + ISO 22081 cited',
+        cov: cfg.cites2768 ? '✗ CONFLICT: two general geometrical specs, remove ISO 2768-2 (K)' : 'Clean: ISO 8015 + ISO 22081 only',
         ok: !cfg.cites2768
       }
     ];

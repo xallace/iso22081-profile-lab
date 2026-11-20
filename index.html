@@ -146,23 +146,25 @@
                     <label for="sl-uz">Unequal / Unilateral Offset UZ</label>
                     <strong id="val-uz">0.00 mm</strong>
                   </div>
-                  <input id="sl-uz" type="range" min="-0.50" max="0.50" step="0.02" value="0.00" />
+                  <input id="sl-uz" type="range" min="-0.50" max="0.50" step="0.01" value="0.00" />
                 </div>
+
+                <p class="slider-note">Shift and tilt move the non-datum faces relative to datum faces A and B (e.g. a second setup). Moving the whole part, datums included, changes nothing.</p>
 
                 <div class="slider-row-dual">
                   <div class="slider-item">
-                    <div class="slider-head"><label for="sl-sx">Shift Δx (from B)</label><strong id="val-sx">+0.04 mm</strong></div>
+                    <div class="slider-head"><label for="sl-sx">Face Shift Δx (vs. B)</label><strong id="val-sx">+0.04 mm</strong></div>
                     <input id="sl-sx" type="range" min="-0.35" max="0.35" step="0.01" value="0.04" />
                   </div>
                   <div class="slider-item">
-                    <div class="slider-head"><label for="sl-sy">Shift Δy (from A)</label><strong id="val-sy">+0.04 mm</strong></div>
+                    <div class="slider-head"><label for="sl-sy">Face Shift Δy (vs. A)</label><strong id="val-sy">+0.04 mm</strong></div>
                     <input id="sl-sy" type="range" min="-0.35" max="0.35" step="0.01" value="0.04" />
                   </div>
                 </div>
 
                 <div class="slider-row-dual">
                   <div class="slider-item">
-                    <div class="slider-head"><label for="sl-tilt">Angular Tilt</label><strong id="val-tilt">+0.05°</strong></div>
+                    <div class="slider-head"><label for="sl-tilt">Face Tilt (vs. A)</label><strong id="val-tilt">+0.05°</strong></div>
                     <input id="sl-tilt" type="range" min="-0.45" max="0.45" step="0.01" value="0.05" />
                   </div>
                   <div class="slider-item">
@@ -197,19 +199,19 @@
           <div class="stage-col">
             <div class="verdict-strip">
               <div class="verdict-cell fail" id="c-v-legacy">
-                <span class="v-kicker">ISO 2768-2 (WITHDRAWN 2021)</span>
-                <div class="v-value" id="c-legacy-val">3 BLINDSPOTS</div>
-                <span class="v-sub" id="c-legacy-sub">Ambiguous step, no freeform ⌓, weak datums</span>
+                <span class="v-kicker">ISO 2768 (PART 2 WITHDRAWN 2021)</span>
+                <div class="v-value" id="c-legacy-val">3 / 5 DEFINED</div>
+                <span class="v-sub" id="c-legacy-sub">Step distance ambiguous, free-form shoulder uncontrolled</span>
               </div>
               <div class="verdict-cell pass" id="c-v-modern">
-                <span class="v-kicker">DIN EN ISO 22081:2021</span>
-                <div class="v-value" id="c-modern-val">0 AMBIGUITIES</div>
-                <span class="v-sub" id="c-modern-sub">100% deterministic CAD TED + Datum System</span>
+                <span class="v-kicker">ISO 22081:2021</span>
+                <div class="v-value" id="c-modern-val">5 / 5 DEFINED</div>
+                <span class="v-sub" id="c-modern-sub">Each feature has a stated requirement (in this model)</span>
               </div>
               <div class="verdict-cell info" id="c-v-pass">
-                <span class="v-kicker">INSPECTION COVERAGE</span>
-                <div class="v-value" id="c-pass-val">3 / 5 PASS</div>
-                <span class="v-sub" id="c-pass-sub">Faults caught cleanly under ISO 22081</span>
+                <span class="v-kicker">ISO 22081 RESULT</span>
+                <div class="v-value" id="c-pass-val">2 / 5 IN TOL.</div>
+                <span class="v-sub" id="c-pass-sub">Features within their requirement</span>
               </div>
             </div>
 
@@ -227,17 +229,17 @@
 
           <aside class="inspector-col">
             <div class="panel-card">
-              <h2 class="plate-heading">Why ISO 2768-2 Was Withdrawn</h2>
+              <h2 class="plate-heading">Where ISO 2768 Falls Short</h2>
               <p class="plate-prose">
-                Legacy <code>ISO 2768-2</code> (withdrawn in 2021) left freeform surfaces uncontrolled, relied on the ambiguous <em>“longer feature = datum”</em> rule, and could not separate step distances from features of size. <strong>ISO 22081</strong> replaces it with one crisp <strong>General Surface Profile <code>⌓ t | A | B | C</code></strong> plus an explicit <strong>General Size</strong> rule.
+                <code>ISO 2768-2</code> (withdrawn 2021) has no profile tolerance, so free-form surfaces get no general tolerance, and its orientation tolerances take the longer leg of an angle as datum instead of a datum system. Step distances fall under the <code>±</code> values of <code>ISO 2768-1</code> (still valid), which ISO 14405-2 regards as ambiguous for dimensions that are not sizes. <strong>ISO 22081</strong> replaces part 2 with a <strong>general surface profile <code>⌓ t | A | B | C</code></strong> and adds a <strong>general size specification</strong> for linear and angular sizes.
               </p>
 
               <div class="control-section">
                 <div class="section-label">STANDARDS &amp; INJECTED PART ERRORS</div>
                 <div class="preset-grid" style="margin-bottom:10px;" id="c-class-btns">
-                  <button class="preset-btn" data-cls="H">2768-H (Fine)</button>
-                  <button class="preset-btn active" data-cls="K">2768-K (Med)</button>
-                  <button class="preset-btn" data-cls="L">2768-L (Coarse)</button>
+                  <button class="preset-btn" data-cls="H">ISO 2768-fH</button>
+                  <button class="preset-btn active" data-cls="K">ISO 2768-mK</button>
+                  <button class="preset-btn" data-cls="L">ISO 2768-cL</button>
                 </div>
 
                 <div class="slider-row-dual">
@@ -253,7 +255,7 @@
 
                 <div class="slider-row-dual">
                   <div class="slider-item">
-                    <div class="slider-head"><label for="sl-cstep">Step Shift Error</label><strong id="val-cstep">0.26 mm</strong></div>
+                    <div class="slider-head"><label for="sl-cstep">16 mm Step Error</label><strong id="val-cstep">0.26 mm</strong></div>
                     <input id="sl-cstep" type="range" min="0.00" max="0.50" step="0.02" value="0.26" />
                   </div>
                   <div class="slider-item">
@@ -264,7 +266,7 @@
 
                 <div class="slider-row-dual">
                   <div class="slider-item">
-                    <div class="slider-head"><label for="sl-cwall">Side Wall Tilt</label><strong id="val-cwall">0.24 mm</strong></div>
+                    <div class="slider-head"><label for="sl-cwall">34 mm Wall Tilt (top)</label><strong id="val-cwall">0.24 mm</strong></div>
                     <input id="sl-cwall" type="range" min="0.00" max="0.60" step="0.02" value="0.24" />
                   </div>
                   <div class="slider-item">
@@ -292,8 +294,8 @@
             <div class="verdict-strip">
               <div class="verdict-cell pass" id="tb-v-status">
                 <span class="v-kicker">TITLE-BLOCK AUDIT</span>
-                <div class="v-value" id="tb-status-val">ISO 22081 VALID</div>
-                <span class="v-sub" id="tb-status-sub">Ready for release &amp; CMM programming</span>
+                <div class="v-value" id="tb-status-val">COMPLETE</div>
+                <span class="v-sub" id="tb-status-sub">All checklist items declared</span>
               </div>
               <div class="verdict-cell info">
                 <span class="v-kicker">ACTIVE GENERAL CALLOUT</span>
@@ -302,8 +304,8 @@
               </div>
               <div class="verdict-cell" id="tb-v-issues">
                 <span class="v-kicker">SPECIFICATION CHECKS</span>
-                <div class="v-value" id="tb-issues-val">0 WARNINGS</div>
-                <span class="v-sub" id="tb-issues-sub">ISO 8015 + ISO 22081 aligned</span>
+                <div class="v-value" id="tb-issues-val">0 ISSUES</div>
+                <span class="v-sub" id="tb-issues-sub">Lab checklist, not a conformity check</span>
               </div>
             </div>
 
@@ -320,7 +322,7 @@
             <div class="panel-card">
               <h2 class="plate-heading">Build a Clean ISO 22081 Title Block</h2>
               <p class="plate-prose">
-                Unlike ISO 2768, <strong>ISO 22081 contains no fixed H/K/L lookup tables</strong>. The designer chooses the exact general profile <code>⌓</code> value, explicit datum system, and general size tolerance appropriate to the part's function and manufacturing process.
+                Unlike ISO 2768, <strong>ISO 22081 has no tolerance classes of its own</strong>. The designer chooses the general profile <code>⌓</code> value, the datum system and the general size tolerances (linear and angular) to suit the part's function and process. In Germany, <strong>DIN 2769</strong> provides tolerance classes for these values.
               </p>
 
               <div class="control-section">
@@ -331,7 +333,7 @@
                     <input id="sl-tbt" type="range" min="0.10" max="1.20" step="0.05" value="0.40" />
                   </div>
                   <div class="slider-item">
-                    <div class="slider-head"><label for="sl-tbs">General Linear Size ±</label><strong id="val-tbs">±0.20 mm</strong></div>
+                    <div class="slider-head"><label for="sl-tbs">General Size (linear) ±</label><strong id="val-tbs">±0.20 mm</strong></div>
                     <input id="sl-tbs" type="range" min="0.05" max="0.50" step="0.05" value="0.20" />
                   </div>
                 </div>
@@ -355,7 +357,7 @@
                   </label>
                   <label class="inline-check">
                     <input type="checkbox" id="chk-tb-size" checked />
-                    <span>Include <strong>General Linear Size</strong> specification (for untoleranced bores/shafts)</span>
+                    <span>Include a <strong>General Size</strong> specification (for untoleranced bores/shafts)</span>
                   </label>
                   <label class="inline-check">
                     <input type="checkbox" id="chk-tb-uz" />
@@ -363,7 +365,7 @@
                   </label>
                   <label class="inline-check">
                     <input type="checkbox" id="chk-tb-2768" />
-                    <span><em>Anti-pattern:</em> Also leave legacy <strong><code>ISO 2768-mK</code></strong> in title block</span>
+                    <span><em>Anti-pattern:</em> Also leave <strong><code>ISO 2768-mK</code></strong> in the title block (K = withdrawn part 2)</span>
                   </label>
                 </div>
               </div>
@@ -383,84 +385,88 @@
       <section class="view" id="view-rules">
         <div class="standards-sheet-page">
           <div class="sheet-folio-header">
-            <span>PLATE IV · DIN EN ISO 22081:2021 MIGRATION &amp; SPECIFICATION RULES</span>
+            <span>PLATE IV · ISO 22081:2021 MIGRATION &amp; SPECIFICATION RULES</span>
             <span>GENERAL SURFACE PROFILE ⌓ · UZ OFFSET · REPLACING ISO 2768-2</span>
           </div>
 
-          <h2 class="plate-heading large">Migrating Cleanly from ISO 2768-2 to ISO 22081</h2>
-          <p class="sheet-subtitle">ISO 2768-2 was officially withdrawn in 2021. Here is the exact GPS specification discipline required on modern engineering drawings.</p>
+          <h2 class="plate-heading large">Migrating from ISO 2768-2 to ISO 22081</h2>
+          <p class="sheet-subtitle">ISO 2768-2 was withdrawn in 2021; EN ISO 22081 supersedes EN 22768-2. ISO 2768-1 remains valid. Points marked “not verified” were not checked against the standard's text.</p>
 
           <div class="rules-spread">
             <div class="rule-col">
               <div class="rule-badge good">DO THIS IN ISO 22081</div>
               <ul class="plate-list">
-                <li><strong>One 3D Skin for All Untoleranced Surfaces:</strong> State <code>ISO 22081</code> with a single <code>⌓ t | A | B | C</code> callout so every plane, step, fillet, chamfer, and freeform surface inherits exact CAD TED limits.</li>
-                <li><strong>Separate Size from Geometry:</strong> Add a General Linear Size tolerance (e.g., <code>±0.2 mm</code>) specifically for untoleranced <em>features of size</em> (holes, slots, shafts, parallel plates).</li>
-                <li><strong>Use Individual Specs for Critical Features:</strong> Tighter functional fits (<code>Ø25 H7</code>, <code>⊥ 0.02 | A</code>) automatically override the general specification without needing exclusions.</li>
+                <li><strong>One Zone for All Untoleranced Surfaces:</strong> Cite <code>ISO 22081</code> with a general <code>⌓ t | A | B | C</code> so every plane, step, fillet, chamfer and free-form surface is held to its CAD TED geometry.</li>
+                <li><strong>Separate Size from Geometry:</strong> Add a general size specification for untoleranced <em>features of size</em> (holes, slots, shafts, parallel faces): linear sizes (e.g. <code>±0.2 mm</code>) and angular sizes.</li>
+                <li><strong>Individual Specs for Critical Features:</strong> Indicate tight requirements (<code>Ø25 H7</code>, <code>⊥ 0.02 | A</code>) directly on the feature. How they combine with the general specification is set in ISO 22081 §5.2 — read it before relying on “override” (not verified here).</li>
               </ul>
             </div>
             <div class="rule-col is-warn">
               <div class="rule-badge warn">LEGACY 2768-2 TRAPS TO AVOID</div>
               <ul class="plate-list">
-                <li><strong>Never Mix <code>ISO 2768-2</code> &amp; <code>ISO 22081</code>:</strong> Leaving both in an old CAD title-block template creates conflicting legal interpretations in supplier audits.</li>
-                <li><strong>Never Omit Datums on General <code>⌓</code>:</strong> Writing <code>⌓ 0.4</code> without <code>| A | B | C</code> only controls surface <em>form</em> — step heights and wall angles can drift arbitrarily!</li>
-                <li><strong>Don't Misread <code>UZ</code>:</strong> Under ISO 1101 / ISO 22081, <code>⌓ 0.4 UZ +0.2</code> means total width is <code>0.4 mm</code> shifted <code>+0.2 mm</code> outward (band <code>0.00 .. +0.40 mm</code>), NOT <code>±0.4 mm</code>!</li>
+                <li><strong>Don't Keep the K in <code>ISO 2768-mK</code>:</strong> With <code>ISO 22081</code> it gives the drawing two general geometrical specifications that contradict each other. The <code>m</code> refers to ISO 2768-1, which is still valid.</li>
+                <li><strong>Don't Drop the Datum System:</strong> Without <code>| A | B | C |</code> the general zone may be moved as a rigid body to best fit the part. Faces stay controlled relative to each other, but not relative to the functional datums. (Whether ISO 22081 makes a datum system mandatory: not verified here; §5.3 has rules for it.)</li>
+                <li><strong>Don't Misread <code>UZ</code>:</strong> Per ISO 1101, <code>⌓ 0.4 UZ +0.2</code> means a <code>0.4 mm</code> wide zone shifted <code>+0.2 mm</code> outward (band <code>0.00 .. +0.40 mm</code>), not <code>±0.4 mm</code>.</li>
               </ul>
             </div>
           </div>
 
           <div class="sheet-divider"></div>
 
-          <h3 class="plate-subhead">Direct Comparison: ISO 2768-2 (Withdrawn) vs. DIN EN ISO 22081:2021</h3>
+          <h3 class="plate-subhead">Direct Comparison: ISO 2768-2 (Withdrawn) vs. ISO 22081:2021</h3>
+          <div class="table-scroll">
           <table class="ref-matrix">
             <thead>
               <tr>
                 <th>Criterion</th>
                 <th>ISO 2768-2:1989 (Withdrawn)</th>
-                <th>DIN EN ISO 22081:2021 (Active)</th>
+                <th>ISO 22081:2021 (Active)</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td><strong>Tolerance Mechanism</strong></td>
-                <td>Fixed lookup tables (classes <code>H / K / L</code>) by nominal length</td>
-                <td>Designer-selected General Surface Profile <code>⌓ t | A | B | C</code> + General Size</td>
+                <td>Fixed tables (classes <code>H / K / L</code>) by nominal length</td>
+                <td>Designer-selected general surface profile <code>⌓ t | A | B | C</code> + general size (classes for Germany: DIN 2769)</td>
               </tr>
               <tr>
-                <td><strong>Freeform &amp; 3D CAD Surfaces</strong></td>
-                <td><strong>Uncontrolled blindspot</strong> (no surface profile rule)</td>
-                <td><strong>100% enclosed</strong> in a uniform 3D profile skin around nominal CAD TEDs</td>
+                <td><strong>Free-Form &amp; 3D CAD Surfaces</strong></td>
+                <td><strong>Not covered</strong> (no profile tolerance)</td>
+                <td>Covered by the general profile zone around the CAD TED geometry</td>
               </tr>
               <tr>
                 <td><strong>Datum Definition</strong></td>
-                <td>Ambiguous “longer feature is datum” heuristic</td>
-                <td>Explicit, unambiguous <strong>Datum System <code>| A | B | C |</code></strong> (ISO 5459)</td>
+                <td>No datum system; for ⊥ the longer leg is the datum (either leg if equal)</td>
+                <td><strong>Datum system <code>| A | B | C |</code></strong> (ISO 5459; rules in ISO 22081 §5.3)</td>
               </tr>
               <tr>
                 <td><strong>Step Heights / Non-Size</strong></td>
-                <td>Confusingly mixed into ISO 2768-1 <code>±</code> linear tolerances</td>
-                <td>Controlled cleanly by <code>⌓ t | A | B | C</code> (form + orientation + location together)</td>
+                <td>Not in part 2; ISO 2768-1 <code>±</code> linear tolerances applied (ambiguous per ISO 14405-2)</td>
+                <td>Controlled by <code>⌓ t | A | B | C</code> (form + orientation + location together)</td>
               </tr>
               <tr>
                 <td><strong>Unequal / Unilateral Offset</strong></td>
-                <td>Not supported</td>
-                <td>Supported natively via <strong><code>UZ ±u</code></strong> (zone <code>[−t/2 + u, +t/2 + u]</code>)</td>
+                <td>Not available</td>
+                <td><code>UZ</code> is defined in ISO 1101 (zone <code>[UZ − t/2, UZ + t/2]</code>); use in the general spec not verified here</td>
               </tr>
               <tr>
-                <td><strong>ISO 8015 Independency</strong></td>
-                <td>Predates modern ISO GPS matrix rules</td>
-                <td>Fully harmonized with ISO 8015, ISO 1101, ISO 5459, and ISO 14405-1</td>
+                <td><strong>ISO GPS System</strong></td>
+                <td>Predates the ISO GPS matrix</td>
+                <td>Part of the ISO GPS system; used together with ISO 8015, ISO 1101, ISO 5459 and ISO 14405-1</td>
               </tr>
             </tbody>
           </table>
+          </div>
 
           <div class="sources-footer-box">
             <strong>Standards &amp; Technical References:</strong>
-            DIN EN ISO 22081:2021 (Geometrical product specifications — General geometrical specifications and general size specifications) ·
-            ISO 2768-2:1989 (Withdrawn 2021) · DIN EN ISO 1101:2017 (Profile of a surface <code>⌓</code> &amp; <code>UZ</code> modifier) ·
-            DIN EN ISO 1660 · DIN EN ISO 5459 · DIN EN ISO 8015 ·
-            Schütte &amp; Jorden, <em>Form- und Lagetoleranzen</em> (Ch. 09 Allgemeintoleranzen) ·
-            Hoischen, <em>Technisches Zeichnen</em> (34th ed., Ch. 06).
+            ISO 22081:2021 / DIN EN ISO 22081:2022-10, <em>Geometrical product specifications (GPS) — Geometrical tolerancing — General geometrical specifications and general size specifications</em> ·
+            DIN 2769 (tolerance classes for ISO 22081 general specifications) ·
+            ISO 2768-1:1989 (valid) · ISO 2768-2:1989 (withdrawn 2021) ·
+            DIN EN ISO 1101:2017 (profile of a surface <code>⌓</code>, <code>UZ</code>) ·
+            ISO 14405-1 · ISO 14405-2 · DIN EN ISO 1660 · DIN EN ISO 5459 · DIN EN ISO 8015 ·
+            Jorden/Schütte, <em>Form- und Lagetoleranzen</em> (Hanser 2020, Kap. 3 Allgemeintoleranzen) ·
+            Hoischen, <em>Technisches Zeichnen</em> (34th ed., 2014 — ISO 2768 only; predates ISO 22081).
           </div>
         </div>
       </section>
@@ -468,7 +474,7 @@
     </main>
 
     <footer class="site-footer">
-      <span class="footer-note">Verified analytically against DIN EN ISO 22081 &amp; ISO 1101 surface profile / UZ equations (14 automated checks · zero external dependencies)</span>
+      <span class="footer-note">Model checks: <code>node tests/verify.mjs</code> tests the lab's own formulas (zones, best fit, tables), not conformity with the standard · zero external dependencies</span>
       <span class="footer-meta">General Profile Lab · <a href="https://xallace.github.io" target="_blank" rel="noopener noreferrer">xallace.github.io</a></span>
     </footer>
   </div>

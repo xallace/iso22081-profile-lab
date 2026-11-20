@@ -1,5 +1,5 @@
 /* ==========================================================================
-   app.js — Interactive Controller for Plate 08 (General Profile & ISO 22081 Lab)
+   app.js — Interactive Controller for TD-01 (General Profile & ISO 22081 Lab)
    ========================================================================== */
 
 (function (global) {
@@ -50,7 +50,7 @@
 
     const pPresets = {
       'bilateral-pass': { t: 0.40, uz: 0.00, datumLocked: true, shiftX: 0.04, shiftY: 0.04, tiltDeg: 0.05, waveAmp: 0.05, stepErr: 0.04 },
-      'uz-stock': { t: 0.40, uz: 0.20, datumLocked: true, shiftX: 0.00, shiftY: 0.00, tiltDeg: 0.00, waveAmp: 0.04, stepErr: 0.30 },
+      'uz-stock': { t: 0.40, uz: 0.20, datumLocked: true, shiftX: 0.00, shiftY: 0.00, tiltDeg: 0.00, waveAmp: 0.00, stepErr: 0.30 },
       'datum-shift': { t: 0.40, uz: 0.00, datumLocked: true, shiftX: 0.26, shiftY: 0.14, tiltDeg: 0.12, waveAmp: 0.03, stepErr: 0.02 },
       'step-trap': { t: 0.40, uz: 0.00, datumLocked: true, shiftX: 0.02, shiftY: 0.02, tiltDeg: 0.02, waveAmp: 0.03, stepErr: 0.30 },
       'mold-in': { t: 0.40, uz: -0.10, datumLocked: true, shiftX: 0.00, shiftY: 0.00, tiltDeg: 0.00, waveAmp: 0.04, stepErr: -0.22 }
@@ -86,15 +86,22 @@
       document.getElementById('val-step').textContent = `${pState.stepErr >= 0 ? '+' : ''}${pState.stepErr.toFixed(2)} mm`;
 
       btnToggleDatum.setAttribute('aria-pressed', String(pState.datumLocked));
-      document.getElementById('ui-btn-datum-label').textContent = pState.datumLocked ? 'Datum-Locked' : 'Floating (Form)';
+      document.getElementById('ui-btn-datum-label').textContent = pState.datumLocked ? 'Datum-Locked' : 'Floating (Best Fit)';
 
       const half = pState.t * 0.5;
-      btnUzIn.classList.toggle('active', Math.abs(pState.uz + half) < 0.015);
-      btnUzIn.classList.toggle('vermilion', Math.abs(pState.uz + half) < 0.015);
-      btnUzZero.classList.toggle('active', Math.abs(pState.uz) < 0.015);
-      btnUzZero.classList.toggle('vermilion', Math.abs(pState.uz) < 0.015);
-      btnUzOut.classList.toggle('active', Math.abs(pState.uz - half) < 0.015);
-      btnUzOut.classList.toggle('vermilion', Math.abs(pState.uz - half) < 0.015);
+      const near = (a, b) => Math.abs(a - b) < 0.005;
+      btnUzIn.classList.toggle('active', near(pState.uz, -half));
+      btnUzIn.classList.toggle('vermilion', near(pState.uz, -half));
+      btnUzZero.classList.toggle('active', near(pState.uz, 0));
+      btnUzZero.classList.toggle('vermilion', near(pState.uz, 0));
+      btnUzOut.classList.toggle('active', near(pState.uz, half));
+      btnUzOut.classList.toggle('vermilion', near(pState.uz, half));
+    }
+
+    // Signed value with a typographic minus, "0.00" without sign
+    function signed(v, d = 2) {
+      const r = Number(v.toFixed(d));
+      return r === 0 ? (0).toFixed(d) : `${r > 0 ? '+' : '−'}${Math.abs(r).toFixed(d)}`;
     }
 
     function renderProfile() {
@@ -110,51 +117,62 @@
       document.getElementById('p-active-val').textContent = sol.activePass ? 'PASS' : 'REJECT';
       document.getElementById('p-active-sub').textContent = sol.activePass
         ? `All ${sol.samples.length} points within ${sol.callout}`
-        : `${sol.breachCount} sample points exceed ${sol.datumLocked ? 'datum-locked' : 'form'} profile zone`;
+        : `${sol.breachCount} of ${sol.samples.length} points outside the ${sol.datumLocked ? 'datum-locked' : 'best-fit'} zone`;
 
       const vBand = document.getElementById('p-v-band');
       vBand.className = `verdict-cell ${Math.abs(sol.uz) > 1e-6 ? 'info' : ''}`;
-      document.getElementById('p-band-val').textContent = `${sol.lowerBound >= 0 ? '+' : ''}${sol.lowerBound.toFixed(2)} .. ${sol.upperBound >= 0 ? '+' : ''}${sol.upperBound.toFixed(2)}`;
+      document.getElementById('p-band-val').textContent = `${signed(sol.lowerBound)} .. ${signed(sol.upperBound)}`;
       document.getElementById('p-band-sub').textContent = sol.uzMode;
 
+      const fit = sol.floatFit;
       const vMode = document.getElementById('p-v-mode');
       vMode.className = `verdict-cell ${sol.datumShiftCaught ? 'paradox' : 'info'}`;
       document.getElementById('p-mode-val').textContent = sol.datumShiftCaught
-        ? 'SHIFT CAUGHT!'
+        ? sol.datumLocked ? 'DATUMS CATCH IT' : 'BEST FIT HIDES IT'
         : sol.datumLocked
           ? 'FORM+ORI+LOC'
-          : 'FORM ONLY';
+          : 'RIGID BEST FIT';
       document.getElementById('p-mode-sub').textContent = sol.datumShiftCaught
-        ? `Form passes (${sol.formSpan.toFixed(2)} ≤ ${sol.t.toFixed(2)}), but datum shift fails!`
-        : `Form span ${sol.formSpan.toFixed(3)} mm · Locked peak ±${sol.absPeakLocked.toFixed(3)} mm`;
+        ? `Best fit needs t ≥ ${sol.minFloatingReq.toFixed(2)} and passes; locked to A|B|C the part ${sol.datumLocked ? 'fails' : 'would fail'}`
+        : sol.datumLocked
+          ? `Locked peak ±${sol.absPeakLocked.toFixed(3)} mm · best fit would need t ≥ ${sol.minFloatingReq.toFixed(3)}`
+          : `Fit Δx ${signed(fit.dx, 3)} · Δy ${signed(fit.dy, 3)} mm · rot ${signed(fit.rotDeg, 3)}°`;
 
       // Callout box
       const masterBox = document.getElementById('p-master-box');
       masterBox.className = `envelope-master ${sol.datumLocked ? 'active-m' : 'active-warn'}`;
       document.getElementById('p-fcf-display').textContent = sol.callout;
       document.getElementById('p-explain').textContent = sol.datumLocked
-        ? `With Datums | A | B | C |, ISO 22081 locks Form, Orientation, and Location simultaneously around nominal CAD TEDs (${sol.lowerBound.toFixed(2)} to ${sol.upperBound >= 0 ? '+' : ''}${sol.upperBound.toFixed(2)} mm).`
-        : `Without datums, ⌓ ${sol.t.toFixed(2)} floats freely to best-fit the manufactured part — controlling Form ONLY. Shift and tilt relative to A/B are ignored!`;
+        ? `With datums | A | B | C | the zone (${signed(sol.lowerBound)} .. ${signed(sol.upperBound)} mm) is fixed to the datum frame: form, orientation and location of every face are checked against the CAD TEDs. Faces A and B define the frame, so only faces displaced relative to them deviate. (C is normal to this view.)`
+        : `Without datums the ⌓ ${sol.t.toFixed(2)} zone may be moved as a rigid body (translation + rotation) to best fit the part. All faces still share one zone, so distances such as the 80 mm width stay controlled, but location and orientation relative to A and B do not.`;
 
       // Telemetry table
+      const tag = (ok) => (ok ? 'tag-pass' : 'tag-fail');
+      const maxA = sol.datumLocked ? sol.maxLocked : sol.maxFloat;
+      const minA = sol.datumLocked ? sol.minLocked : sol.minFloat;
+      const modeTag = sol.datumLocked ? 'locked' : 'after best fit';
       document.getElementById('p-telemetry').innerHTML = `
-        <tr><th>Max Outward Deviation δ_max</th><td class="${sol.maxLocked > sol.upperBound + 1e-9 ? 'tag-fail' : 'tag-pass'}">${sol.maxLocked >= 0 ? '+' : ''}${sol.maxLocked.toFixed(3)} mm</td></tr>
-        <tr><th>Max Inward Deviation δ_min</th><td class="${sol.minLocked < sol.lowerBound - 1e-9 ? 'tag-fail' : 'tag-pass'}">${sol.minLocked >= 0 ? '+' : ''}${sol.minLocked.toFixed(3)} mm</td></tr>
-        <tr><th>Allowed Signed Band [−t/2+UZ, +t/2+UZ]</th><td class="tag-blue">[${sol.lowerBound.toFixed(2)}, ${sol.upperBound >= 0 ? '+' : ''}${sol.upperBound.toFixed(2)}] mm</td></tr>
-        <tr><th>Min Bilateral ⌓ Needed (2 × max|δ|)</th><td>${sol.minBilateralReq.toFixed(3)} mm</td></tr>
-        <tr><th>Pure Form Span (Floating ⌓)</th><td class="${sol.passFloating ? 'tag-pass' : 'tag-fail'}">${sol.formSpan.toFixed(3)} mm (${sol.passFloating ? 'PASS' : 'FAIL'})</td></tr>
-        <tr><th>Datum-Locked Verdict (| A | B | C |)</th><td class="${sol.passLocked ? 'tag-pass' : 'tag-fail'}">${sol.passLocked ? 'PASS' : 'REJECT'}</td></tr>
+        <tr><th>Max Outward Deviation δ_max (${modeTag})</th><td class="${tag(maxA <= sol.upperBound + 1e-9)}">${signed(maxA, 3)} mm</td></tr>
+        <tr><th>Max Inward Deviation δ_min (${modeTag})</th><td class="${tag(minA >= sol.lowerBound - 1e-9)}">${signed(minA, 3)} mm</td></tr>
+        <tr><th>Allowed Signed Band [UZ − t/2, UZ + t/2]</th><td class="tag-blue">[${signed(sol.lowerBound)}, ${signed(sol.upperBound)}] mm</td></tr>
+        <tr><th>Min Bilateral ⌓ Needed, Locked (2 × max|δ|)</th><td>${sol.minBilateralReq.toFixed(3)} mm</td></tr>
+        <tr><th>Min ⌓ Needed, Floating (best fit, this UZ)</th><td>${sol.minFloatingReq.toFixed(3)} mm</td></tr>
+        <tr><th>Best-Fit Move (Δx, Δy, rotation)</th><td>${signed(fit.dx, 3)}, ${signed(fit.dy, 3)} mm, ${signed(fit.rotDeg, 3)}°</td></tr>
+        <tr><th>Floating Verdict (| ⌓ | t |)</th><td class="${tag(sol.passFloating)}">${sol.passFloating ? 'PASS' : 'REJECT'}</td></tr>
+        <tr><th>Datum-Locked Verdict (| A | B | C |)</th><td class="${tag(sol.passLocked)}">${sol.passLocked ? 'PASS' : 'REJECT'}</td></tr>
       `;
     }
 
+    function applyProfilePreset(name) {
+      const pre = pPresets[name];
+      if (!pre) return;
+      Object.assign(pState, pre);
+      document.querySelectorAll('#p-presets .preset-btn').forEach((b) => b.classList.toggle('active', b.dataset.ppre === name));
+      renderProfile();
+    }
+
     document.querySelectorAll('#p-presets .preset-btn').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const pre = pPresets[btn.dataset.ppre];
-        if (!pre) return;
-        Object.assign(pState, pre);
-        document.querySelectorAll('#p-presets .preset-btn').forEach((b) => b.classList.toggle('active', b === btn));
-        renderProfile();
-      });
+      btn.addEventListener('click', () => applyProfilePreset(btn.dataset.ppre));
     });
 
     function clearProfilePresetActive() {
@@ -169,10 +187,12 @@
     elWave.addEventListener('input', () => { pState.waveAmp = Number(elWave.value); clearProfilePresetActive(); renderProfile(); });
     elStep.addEventListener('input', () => { pState.stepErr = Number(elStep.value); clearProfilePresetActive(); renderProfile(); });
 
-    btnToggleDatum.addEventListener('click', () => { pState.datumLocked = !pState.datumLocked; renderProfile(); });
-    btnUzIn.addEventListener('click', () => { pState.uz = -(pState.t * 0.5); clearProfilePresetActive(); renderProfile(); });
+    btnToggleDatum.addEventListener('click', () => { pState.datumLocked = !pState.datumLocked; clearProfilePresetActive(); renderProfile(); });
+    // ±t/2 rounded to the UZ slider step (0.01 mm) so state and slider agree
+    const halfT = () => Math.round(pState.t * 50) / 100;
+    btnUzIn.addEventListener('click', () => { pState.uz = -halfT(); clearProfilePresetActive(); renderProfile(); });
     btnUzZero.addEventListener('click', () => { pState.uz = 0; clearProfilePresetActive(); renderProfile(); });
-    btnUzOut.addEventListener('click', () => { pState.uz = pState.t * 0.5; clearProfilePresetActive(); renderProfile(); });
+    btnUzOut.addEventListener('click', () => { pState.uz = halfT(); clearProfilePresetActive(); renderProfile(); });
 
     // =========================================================================
     // TAB 2 STATE: ISO 22081 VS. ISO 2768-2 AUDIT
@@ -202,9 +222,10 @@
       const audit = M.auditLegacyVs22081(cState);
       D.drawComparePlate(document.getElementById('canvas-compare'), audit, cState.viewMode);
 
-      document.getElementById('c-legacy-val').textContent = `${audit.legacyBlindspots} BLINDSPOTS`;
-      document.getElementById('c-modern-val').textContent = `${audit.modernAmbiguities} AMBIGUITIES`;
-      document.getElementById('c-pass-val').textContent = `${audit.modernPassCount} / ${audit.features.length} PASS`;
+      const nF = audit.features.length;
+      document.getElementById('c-legacy-val').textContent = `${nF - audit.legacyGaps} / ${nF} DEFINED`;
+      document.getElementById('c-modern-val').textContent = `${audit.modernDefined} / ${nF} DEFINED`;
+      document.getElementById('c-pass-val').textContent = `${audit.modernPassCount} / ${nF} IN TOL.`;
 
       const pillCls = (st) =>
         st === 'PASS' ? 'pass' : st === 'FAIL' || st === 'UNCONTROLLED' ? 'fail' : st === 'AMBIGUOUS' ? 'warn' : 'info';
@@ -287,23 +308,25 @@
       vStatus.className = `verdict-cell ${res.valid ? 'pass' : res.errorCount > 0 ? 'fail' : 'paradox'}`;
       document.getElementById('tb-status-val').textContent = res.status;
       document.getElementById('tb-status-sub').textContent = res.valid
-        ? 'Ready for release & CMM programming'
-        : `${res.errorCount} error(s), ${res.warnCount} warning(s) detected`;
+        ? 'All checklist items declared'
+        : `${res.errorCount} conflict(s), ${res.warnCount} missing item(s)`;
 
       document.getElementById('tb-fcf-val').textContent = res.fcfLine;
       const totalIssues = res.errorCount + res.warnCount;
       const vIssues = document.getElementById('tb-v-issues');
       vIssues.className = `verdict-cell ${totalIssues === 0 ? 'pass' : res.errorCount > 0 ? 'fail' : 'paradox'}`;
-      document.getElementById('tb-issues-val').textContent = totalIssues === 0 ? '0 WARNINGS' : `${totalIssues} ISSUE${totalIssues > 1 ? 'S' : ''}`;
+      document.getElementById('tb-issues-val').textContent = totalIssues === 0 ? '0 ISSUES' : `${totalIssues} ISSUE${totalIssues > 1 ? 'S' : ''}`;
+      document.getElementById('tb-issues-sub').textContent = res.noteCount > 0
+        ? `${res.noteCount} unverified point${res.noteCount > 1 ? 's' : ''} noted`
+        : 'Lab checklist, not a conformity check';
 
-      const stack = document.getElementById('tb-issue-stack');
-      if (res.issues.length === 0) {
-        stack.innerHTML = `<div class="issue-item ok"><strong>✓ Fully ISO 22081 Compliant:</strong> Explicit datum system, CAD TED geometry, and general size are cleanly separated with zero legacy ISO 2768-2 conflicts.</div>`;
-      } else {
-        stack.innerHTML = res.issues
-          .map((it) => `<div class="issue-item ${it.level}"><strong>${it.level === 'error' ? '✗ ERROR:' : '⚠ WARNING:'}</strong> ${it.msg}</div>`)
-          .join('');
-      }
+      const label = { error: '✗ CONFLICT:', warn: '⚠ MISSING:', note: 'ℹ NOTE:' };
+      const head = totalIssues === 0
+        ? `<div class="issue-item ok"><strong>✓ Checklist complete:</strong> datum system, CAD/TED source and general size are declared; no ISO 2768-2 class is cited.</div>`
+        : '';
+      document.getElementById('tb-issue-stack').innerHTML = head + res.issues
+        .map((it) => `<div class="issue-item ${it.level}"><strong>${label[it.level]}</strong> ${it.msg}</div>`)
+        .join('');
     }
 
     document.getElementById('sl-tbt').addEventListener('input', (e) => { tbState.tProfile = Number(e.target.value); renderTitleBlock(); });
@@ -322,25 +345,25 @@
       {
         tab: 'profile',
         title: 'General Surface Profile ⌓ Locks Form, Orientation & Location Together',
-        body: 'In Plate I, one callout | ⌓ | 0.40 | A | B | C | wraps the entire nominal CAD contour in a uniform ±0.20 mm skin. Click "Datum Shift Caught" or toggle Datum-Locked vs. Floating to see why referencing Datums A|B|C is essential.',
-        action: () => { Object.assign(pState, pPresets['datum-shift']); renderProfile(); }
+        body: 'One callout | ⌓ | 0.40 | A | B | C | puts the whole CAD contour in a ±0.20 mm zone fixed to the datums. Here the upper faces sit 0.26 mm off relative to datum faces A and B (second setup). Toggle Datum-Locked vs. Floating: the best-fit zone absorbs part of the offset and accepts the part, the datum-locked zone rejects it.',
+        action: () => { applyProfilePreset('datum-shift'); }
       },
       {
         tab: 'profile',
-        title: 'Unequal & Unilateral Stock Allowances via UZ Modifier',
-        body: 'Casting or finishing stock? Click "UZ +t/2" (or "Unilateral Stock") to shift the entire 0.40 mm zone outside nominal [0.00 .. +0.40 mm] without changing total tolerance width.',
-        action: () => { Object.assign(pState, pPresets['uz-stock']); renderProfile(); }
+        title: 'Unequal & Unilateral Zones via UZ (ISO 1101)',
+        body: 'Casting or finishing stock? "Unilateral Stock" uses UZ +0.20 to move the 0.40 mm zone fully outside the nominal surface (0.00 .. +0.40 mm) without changing its width. Any face that dips below nominal now fails.',
+        action: () => { applyProfilePreset('uz-stock'); }
       },
       {
         tab: 'compare',
-        title: 'Why ISO 2768-2 Was Withdrawn in 2021',
-        body: 'Toggle between "View ISO 2768-2 (Legacy)" and "View ISO 22081 (Active)" in Plate II. Watch how legacy 2768-2 leaves freeform surfaces uncontrolled and step heights ambiguous — while ISO 22081 resolves every single feature cleanly.',
-        action: () => { cState.viewMode = '2768'; btnMode2768.click(); }
+        title: 'What ISO 2768-2 Left Open',
+        body: 'Toggle "View ISO 2768-2 (Legacy)" and "View ISO 22081 (Active)". Under ISO 2768 the free-form shoulder has no general tolerance and the 16 mm step gets an ambiguous ± value; under ISO 22081 each feature has a stated requirement.',
+        action: () => { btnMode2768.click(); }
       },
       {
         tab: 'titleblock',
-        title: 'Build a Release-Ready ISO 22081 Title Block',
-        body: 'Use Plate III to verify your drawing title block. Try checking "Also leave legacy ISO 2768-mK" or unchecking Datums to see the exact compliance traps caught during supplier audits.',
+        title: 'Build an ISO 22081 Title Block',
+        body: 'Check "Also leave ISO 2768-mK" or uncheck the datum system to see what the checklist flags. It is a lab checklist, not a conformity check against the standard.',
         action: () => { renderTitleBlock(); }
       }
     ];
