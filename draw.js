@@ -1,26 +1,26 @@
 /* ==========================================================================
    draw.js — High-DPI Technical Drafting Renderers for TD-01 (ISO 22081)
-   1967 Technical Book-Plate Palette (#faf5e8, #181715, #d94426, #047857, #0369a1)
+   1967 Technical Book-Plate Palette (#0a101a, #e9edf5, #ff7d61, #58b691, #56a8e4)
    ========================================================================== */
 
 (function (global) {
   'use strict';
 
   const C = {
-    paper: '#faf5e8',
-    grid: 'rgba(24, 23, 21, 0.065)',
-    ink: '#181715',
-    inkSoft: '#4b463e',
-    dim: '#736b5f',
-    vermilion: '#d94426',
-    ok: '#047857',
-    okFill: 'rgba(4, 120, 87, 0.14)',
-    blue: '#0369a1',
-    blueFill: 'rgba(3, 105, 161, 0.13)',
-    amber: '#b45309',
-    amberFill: 'rgba(180, 83, 9, 0.14)',
-    warnFill: 'rgba(217, 68, 38, 0.16)',
-    partFill: 'rgba(24, 23, 21, 0.065)'
+    paper: '#0a101a',
+    grid: 'rgba(233, 237, 245, 0.065)',
+    ink: '#e9edf5',
+    inkSoft: '#a8b3c5',
+    dim: '#7f8b9f',
+    vermilion: '#ff7d61',
+    ok: '#58b691',
+    okFill: 'rgba(88, 182, 145, 0.14)',
+    blue: '#56a8e4',
+    blueFill: 'rgba(86, 168, 228, 0.13)',
+    amber: '#ed864b',
+    amberFill: 'rgba(237, 134, 75, 0.14)',
+    warnFill: 'rgba(255, 125, 97, 0.16)',
+    partFill: 'rgba(233, 237, 245, 0.065)'
   };
 
   function setupCanvas(canvas) {
@@ -208,7 +208,7 @@
       else ctx.lineTo(px, py);
     });
     ctx.closePath();
-    ctx.strokeStyle = 'rgba(24, 23, 21, 0.55)';
+    ctx.strokeStyle = 'rgba(233, 237, 245, 0.55)';
     ctx.lineWidth = 1.15;
     ctx.stroke();
 
@@ -305,7 +305,7 @@
 
     // Zero nominal CAD line
     const y0 = mapY(0);
-    ctx.strokeStyle = 'rgba(24, 23, 21, 0.35)';
+    ctx.strokeStyle = 'rgba(233, 237, 245, 0.35)';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(padL, y0);
@@ -363,7 +363,7 @@
     });
 
     // Segment boundary ticks
-    ctx.strokeStyle = 'rgba(24, 23, 21, 0.22)';
+    ctx.strokeStyle = 'rgba(233, 237, 245, 0.22)';
     ctx.lineWidth = 1;
     ctx.beginPath();
     spans.forEach((sp, i) => {
@@ -445,7 +445,7 @@
     // Under ISO 22081, wrap the entire non-overridden perimeter in a translucent green general ⌓ skin!
     if (!isLegacy) {
       ctx.save();
-      ctx.strokeStyle = 'rgba(4, 120, 87, 0.24)';
+      ctx.strokeStyle = 'rgba(88, 182, 145, 0.24)';
       ctx.lineWidth = 12;
       ctx.lineJoin = 'round';
       ctx.stroke();
