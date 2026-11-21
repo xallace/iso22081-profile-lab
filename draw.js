@@ -75,7 +75,7 @@
       ctx.fillRect(-10, 22, 20, 18);
       ctx.strokeRect(-10, 22, 20, 18);
       ctx.fillStyle = C.ink;
-      ctx.font = '700 11px "JetBrains Mono", monospace';
+      ctx.font = '700 11px "Iosevka Charon Mono", monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(label, 0, 31);
@@ -93,7 +93,7 @@
       ctx.fillRect(-42, -9, 20, 18);
       ctx.strokeRect(-42, -9, 20, 18);
       ctx.fillStyle = C.ink;
-      ctx.font = '700 11px "JetBrains Mono", monospace';
+      ctx.font = '700 11px "Iosevka Charon Mono", monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(label, -32, 0);
@@ -114,7 +114,7 @@
 
   function drawTedBox(ctx, x, y, text) {
     ctx.save();
-    ctx.font = '600 10.5px "JetBrains Mono", monospace';
+    ctx.font = '600 10.5px "Iosevka Charon Mono", monospace';
     const tw = ctx.measureText(text).width + 10;
     ctx.fillStyle = C.paper;
     ctx.strokeStyle = C.ink;
@@ -249,7 +249,7 @@
     } else {
       ctx.fillStyle = C.blue;
       ctx.textAlign = 'center';
-      fitFont(ctx, 'NO DATUMS — ZONE MOVED AS A RIGID BODY TO BEST FIT THE PART', w - 24, 10.5, '600', '"JetBrains Mono", monospace');
+      fitFont(ctx, 'NO DATUMS — ZONE MOVED AS A RIGID BODY TO BEST FIT THE PART', w - 24, 10.5, '600', '"Iosevka Charon Mono", monospace');
       ctx.fillText('NO DATUMS — ZONE MOVED AS A RIGID BODY TO BEST FIT THE PART', w * 0.5, toY(0) + 40);
     }
 
@@ -259,7 +259,7 @@
     drawTedBox(ctx, toX(64), toY(0) + 18, '80.00');
 
     // Legend strip in top-left (wraps to a new line instead of clipping on narrow canvases)
-    ctx.font = '600 10px "JetBrains Mono", monospace';
+    ctx.font = '600 10px "Iosevka Charon Mono", monospace';
     ctx.textAlign = 'left';
     const legend = [
       ['— Actual contour', C.ink],
@@ -325,7 +325,7 @@
 
     // Axis labels
     ctx.fillStyle = C.dim;
-    ctx.font = '600 9.5px "JetBrains Mono", monospace';
+    ctx.font = '600 9.5px "Iosevka Charon Mono", monospace';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
     const signed = (v) => {
@@ -422,7 +422,7 @@
          `${audit.iso2768Label}: ${audit.legacyGaps} OF ${n} UNDEFINED`]
       : [`ISO 22081 VIEW — | ⌓ | ${audit.tProfile.toFixed(2)} | A | B | C | + GENERAL SIZE ±${audit.tSize.toFixed(2)}`,
          `ISO 22081: | ⌓ | ${audit.tProfile.toFixed(2)} | A | B | C | ±${audit.tSize.toFixed(2)}`];
-    const bannerFont = '"JetBrains Mono", monospace';
+    const bannerFont = '"Iosevka Charon Mono", monospace';
     ctx.font = `700 9px ${bannerFont}`;
     const bannerTxt = bannerVariants.find((t) => ctx.measureText(t).width <= w - 48) || bannerVariants[bannerVariants.length - 1];
     fitFont(ctx, bannerTxt, w - 48, 11.5, '700', bannerFont);
@@ -483,7 +483,7 @@
     // Highlight each inspected zone with crisp callout badges
     function badge(x, y, title, status, color) {
       ctx.save();
-      ctx.font = '700 9.5px "JetBrains Mono", monospace';
+      ctx.font = '700 9.5px "Iosevka Charon Mono", monospace';
       const wBox = Math.max(ctx.measureText(title).width, ctx.measureText(status).width) + 14;
       const bx = x - wBox * 0.5;
       const by = y - 16;
@@ -554,7 +554,7 @@
       const note = 'ISO 2768-2: NO DATUM SYSTEM — FOR ⊥ THE LONGER LEG SERVES AS DATUM';
       ctx.fillStyle = C.amber;
       ctx.textAlign = 'center';
-      fitFont(ctx, note, w - 28, 10.5, '700', '"JetBrains Mono", monospace');
+      fitFont(ctx, note, w - 28, 10.5, '700', '"Iosevka Charon Mono", monospace');
       ctx.fillText(note, w * 0.5, toY(0) + 34);
     }
   }
@@ -575,7 +575,7 @@
 
     // Top-left schematic coverage preview
     ctx.fillStyle = C.ink;
-    ctx.font = '700 11px "JetBrains Mono", monospace';
+    ctx.font = '700 11px "Iosevka Charon Mono", monospace';
     ctx.textAlign = 'left';
     ctx.fillText('DRAWING FIELD — FEATURE COVERAGE BY SPECIFICATION LAYER', 38, 46);
 
@@ -611,10 +611,10 @@
       ctx.strokeRect(38, y, w - 76, 36);
 
       ctx.fillStyle = C.ink;
-      ctx.font = '700 11px "Inter", sans-serif';
+      ctx.font = '700 11px "Iosevka Charon", sans-serif';
       ctx.fillText(b.label, 50, y + 14);
       ctx.fillStyle = b.ok ? C.ok : C.vermilion;
-      ctx.font = '600 10.5px "JetBrains Mono", monospace';
+      ctx.font = '600 10.5px "Iosevka Charon Mono", monospace';
       ctx.fillText(b.cov, 50, y + 29);
     });
 
@@ -639,7 +639,7 @@
     ctx.stroke();
 
     ctx.fillStyle = C.ink;
-    ctx.font = '700 11px "JetBrains Mono", monospace';
+    ctx.font = '700 11px "Iosevka Charon Mono", monospace';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     ctx.fillText('TITLE BLOCK · GENERAL GEOMETRICAL SPECIFICATION', tbX + 12, tbY + 15);
@@ -655,7 +655,7 @@
       const ly = tbY + 42 + idx * 20;
       const isBad = line.startsWith('✗') || line.startsWith('⚠');
       ctx.fillStyle = isBad ? C.vermilion : idx === 2 ? C.blue : C.ink;
-      ctx.font = idx === 2 ? '700 12px "JetBrains Mono", monospace' : '500 11px "JetBrains Mono", monospace';
+      ctx.font = idx === 2 ? '700 12px "Iosevka Charon Mono", monospace' : '500 11px "Iosevka Charon Mono", monospace';
       ctx.fillText(line, tbX + 14, ly);
     });
   }
